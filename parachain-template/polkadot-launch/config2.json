@@ -28,26 +28,6 @@
 			"balance": "1000000000000000000000",
 			"nodes": [
 				{
-					"wsPort": 9989,
-					"rpcPort": 9089,
-					"name": "alice",
-					"port": 31201,
-					"flags": [
-						"--",
-						"--execution=wasm"
-					]
-				},
-				{
-					"wsPort": 9990,
-					"rpcPort": 9090,
-					"name": "bob",
-					"port": 31202,
-					"flags": [
-						"--",
-						"--execution=wasm"
-					]
-				},
-				{
 					"wsPort": 9991,
 					"rpcPort": 9091,
 					"name": "dave",
