@@ -38,10 +38,22 @@ use sp_runtime::{
 /// From Nimbu's perspective any block that faithfully reports its authorship to the runtime
 /// is valid. The intention is that the runtime itself may then put further restrictions on
 /// the identity of the author.
-struct Verifier<Client, Block, CIDP> {
+pub struct Verifier<Client, Block, CIDP> {
 	client: Arc<Client>,
 	create_inherent_data_providers: CIDP,
 	_marker: PhantomData<Block>,
+}
+
+/// Build the [`Verifier`].
+pub fn build_verifier<Client, Block, CIDP>(
+	client: Arc<Client>,
+	create_inherent_data_providers: CIDP,
+) -> Verifier<Client, Block, CIDP> {
+	Verifier {
+		client,
+		create_inherent_data_providers,
+		_marker: PhantomData {},
+	}
 }
 
 #[async_trait::async_trait]
