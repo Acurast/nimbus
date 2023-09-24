@@ -1,4 +1,5 @@
 // Copyright 2019-2022 PureStake Inc.
+// Copyright 2023 Papers AG
 // This file is part of Nimbus.
 
 // Nimbus is free software: you can redistribute it and/or modify
@@ -20,11 +21,12 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::traits::{FindAuthor, Get};
+use frame_support::traits::{FindAuthor, Get, OneSessionHandler};
 use nimbus_primitives::{
 	AccountLookup, CanAuthor, NimbusId, SlotBeacon, INHERENT_IDENTIFIER, NIMBUS_ENGINE_ID,
 };
 use parity_scale_codec::{Decode, Encode};
+use sp_application_crypto::BoundToRuntimeAppPublic;
 use sp_inherents::{InherentIdentifier, IsFatalError};
 use sp_runtime::{ConsensusEngineId, RuntimeString};
 
@@ -118,6 +120,7 @@ pub mod pallet {
 		/// but before transactions are executed.
 		// This should go into on_post_inherents when it is ready https://github.com/paritytech/substrate/pull/10128
 		// TODO better weight. For now we just set a somewhat conservative fudge factor
+		#[pallet::call_index(0)]
 		#[pallet::weight((T::WeightInfo::kick_off_authorship_validation(), DispatchClass::Mandatory))]
 		pub fn kick_off_authorship_validation(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			ensure_none(origin)?;
@@ -217,6 +220,27 @@ pub mod pallet {
 				Author::<T>::put(author)
 			}
 		}
+	}
+
+	/// Trait required by the pallet session.
+	impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T> {
+		type Key = <Self as BoundToRuntimeAppPublic>::Public;
+
+		fn on_genesis_session<'a, I: 'a>(_: I)
+		where
+			I: Iterator<Item = (&'a T::AccountId, Self::Key)>,
+		{
+		}
+
+		fn on_new_session<'a, I: 'a>(_: bool, _: I, _: I)
+		where
+			I: Iterator<Item = (&'a T::AccountId, Self::Key)>,
+		{
+		}
+
+		fn on_disabled(_: u32) {}
+
+		fn on_before_session_ending() {}
 	}
 }
 
