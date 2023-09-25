@@ -101,7 +101,7 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_initialize(_: T::BlockNumber) -> Weight {
+		fn on_initialize(_: BlockNumberFor<T>) -> Weight {
 			// Now extract the author from the digest
 			let digest = <frame_system::Pallet<T>>::digest();
 			let pre_runtime_digests = digest.logs.iter().filter_map(|d| d.as_pre_runtime());
@@ -118,7 +118,7 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		/// This inherent is a workaround to run code after the "real" inherents have executed,
 		/// but before transactions are executed.
-		// This should go into on_post_inherents when it is ready https://github.com/paritytech/substrate/pull/10128
+		// This should go into on_post_inherents when it is ready https://github.com/paritytech/polkadot-sdk/pull/10128
 		// TODO better weight. For now we just set a somewhat conservative fudge factor
 		#[pallet::call_index(0)]
 		#[pallet::weight((T::WeightInfo::kick_off_authorship_validation(), DispatchClass::Mandatory))]

@@ -58,7 +58,6 @@ impl NonZeroU32 {
 	}
 }
 
-#[cfg(feature = "std")]
 impl Serialize for NonZeroU32 {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
 	where
@@ -68,7 +67,6 @@ impl Serialize for NonZeroU32 {
 	}
 }
 
-#[cfg(feature = "std")]
 impl<'de> Deserialize<'de> for NonZeroU32 {
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
 	where

@@ -25,8 +25,6 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::pallet;
-
 pub use pallet::*;
 
 #[cfg(any(test, feature = "runtime-benchmarks"))]
@@ -41,7 +39,7 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
-#[pallet]
+#[frame_support::pallet]
 pub mod pallet {
 
 	use crate::num::NonZeroU32;
@@ -65,7 +63,7 @@ pub mod pallet {
 		/// The overarching event type
 		type RuntimeEvent: From<Event> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		/// Deterministic on-chain pseudo-randomness used to do the filtering
-		type RandomnessSource: Randomness<H256, Self::BlockNumber>;
+		type RandomnessSource: Randomness<H256, BlockNumberFor<Self>>;
 		//TODO introduce a new trait for exhaustive sets and use it here.
 		// Oh actually, we can use the same trait. First we call the inner one
 		// to determine whether this particular author is eligible there. then we
@@ -201,21 +199,23 @@ pub mod pallet {
 	}
 
 	#[pallet::genesis_config]
-	pub struct GenesisConfig {
+	pub struct GenesisConfig<T: Config> {
 		pub eligible_count: EligibilityValue,
+		#[serde(skip)]
+		pub _phantom: sp_std::marker::PhantomData<T>,
 	}
 
-	#[cfg(feature = "std")]
-	impl Default for GenesisConfig {
+	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
 			Self {
 				eligible_count: EligibilityValue::default(),
+				_phantom: Default::default(),
 			}
 		}
 	}
 
 	#[pallet::genesis_build]
-	impl<T: Config> GenesisBuild<T> for GenesisConfig {
+	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
 		fn build(&self) {
 			EligibleCount::<T>::put(self.eligible_count.clone());
 		}

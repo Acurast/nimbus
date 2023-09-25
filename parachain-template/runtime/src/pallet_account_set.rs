@@ -4,8 +4,8 @@
 //!
 //! The Substrate ecosystem has a wide variety of real-world solutions and examples of what this
 //! pallet could be replaced with.
-//! Gautam's validator set pallet - https://github.com/paritytech/substrate/tree/master/frame/staking/
-//! Parity's pallet staking - https://github.com/paritytech/substrate/tree/master/frame/staking/
+//! Gautam's validator set pallet - https://github.com/paritytech/polkadot-sdk/tree/master/frame/staking/
+//! Parity's pallet staking - https://github.com/paritytech/polkadot-sdk/tree/master/frame/staking/
 //! Moonbeam's Parachain Staking - https://github.com/PureStake/moonbeam/tree/master/pallets/parachain-staking
 //! Recipe for AccountSet, VecSet, and MapSet
 
@@ -17,8 +17,6 @@ pub use pallet::*;
 pub mod pallet {
 
 	use frame_support::pallet_prelude::*;
-	#[cfg(feature = "std")]
-	use log::warn;
 	use nimbus_primitives::{AccountLookup, CanAuthor, NimbusId};
 	use sp_std::vec::Vec;
 
@@ -48,24 +46,18 @@ pub mod pallet {
 	type Mapping<T: Config> = StorageMap<_, Twox64Concat, NimbusId, T::AccountId, OptionQuery>;
 
 	#[pallet::genesis_config]
+	#[derive(frame_support::DefaultNoBound)]
 	/// Genesis config for author mapping pallet
 	pub struct GenesisConfig<T: Config> {
 		/// The associations that should exist at chain genesis
 		pub mapping: Vec<(T::AccountId, NimbusId)>,
 	}
 
-	#[cfg(feature = "std")]
-	impl<T: Config> Default for GenesisConfig<T> {
-		fn default() -> Self {
-			Self { mapping: vec![] }
-		}
-	}
-
 	#[pallet::genesis_build]
-	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
 		fn build(&self) {
 			if self.mapping.is_empty() {
-				warn!(target: "account-set", "No mappings at genesis. Your chain will have no valid authors.");
+				log::warn!(target: "account-set", "No mappings at genesis. Your chain will have no valid authors.");
 			}
 			for (account_id, author_id) in &self.mapping {
 				Mapping::<T>::insert(author_id, account_id);
